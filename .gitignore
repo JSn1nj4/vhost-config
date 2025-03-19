@@ -1,0 +1,7 @@
+/.idea
+/.vscode
+/config/*
+!/config/*-example
+!/config/*-sample
+!/config/*-template
+

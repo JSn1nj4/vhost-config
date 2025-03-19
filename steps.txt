@@ -1,0 +1,15 @@
+1. request vhost name
+2. check for and validate vhost config file in /config
+3. make sure dependencies are installed
+	- apache or nginx?
+	- mysql or postgresql?
+	- php version
+	- mkcert
+4. link vhost ref to project root
+5. setup php fpm config
+6. create database
+7. create vhost config in 'sites-available' and link in 'sites-enabled'
+8. write to /etc/hosts
+9. restart php-fpm apache|nginx mysql|postgresql
+
+steps 2 onward can be separate tasks

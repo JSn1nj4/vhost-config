@@ -1,0 +1,48 @@
+server {
+	server_name {{ hostname }} www.{{ hostname }};
+	root /var/www/{{ hostname }}/public;
+
+	add_header X-Frame-Options		"SAMEORIGIN";
+	add_header X-XSS-Protection		"1; mode=block";
+	add_header X-Content-Type-Options	"nosniff";
+
+	index index.php;
+
+	charset utf-8;
+
+	location / {
+		try_files $uri $uri/ /index.php?$query_string;
+	}
+
+	location = /favicon.ico { access_log off; log_not_found off; }
+	location = /robots.txt { access_log off; log_not_found off; }
+
+	error_page 404 /index.php;
+
+	location ~ \.php$ {
+		fastcgi_pass unix:/var/run/php/{{ hostname }}.sock;
+		fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+		include fastcgi_params;
+	}
+
+	location ~ /\.(?!well-known).* {
+		deny all;
+	}
+
+	listen 443 ssl;
+	ssl_certificate /var/www/{{ hostname }}/config/local/{{ hostname }}.pem;
+	ssl_certificate_key /var/www/{{ hostname }}/config/local/{{ hostname }}-key.pem;
+}
+server {
+	if ($host = www.{{ hostname }}) {
+		return 301 https://$host$request_uri;
+	}
+
+	if ($host = {{ hostname }}) {
+		return 301 https://$host$request_uri;
+	}
+
+	server_name {{ hostname }} www.{{ hostname }};
+	listen 80;
+	return 404;
+}
