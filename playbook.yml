@@ -11,7 +11,11 @@
   
   tasks:
     - name: import vhost config debugging task
-      include_tasks: tasks/debug-vhost-config.yml
+      block:
+        -
+          include_tasks: tasks/debug-vhost-config.yml
+        -
+          meta: end_play
       when: debug_config is defined and debug_config
     
     - name: start primary tasks
