@@ -10,21 +10,13 @@
     - config/{{ vhost }}.yml
   
   tasks:
-
-    - name: print vars from provided config file
-      debug:
-        msg:
-          - "Hostname: {{ hostname }}"
-          - "Project directory: {{ project_dir }}"
-          - "PHP version: {{ php }}"
-          - "FPM settings:"
-          - "User: {{ fpm.user }}"
-          - "Group: {{ fpm.group }}"
-          - "Listening user: {{ fpm.listen.user }}"
-          - "Listening group: {{ fpm.listen.group }}"
-          - "Database:"
-          - "Type: {{ db.type }}"
-          - "Host: {{ db.host }}"
-          - "Name: {{ db.name }}"
-          - "User: {{ db.user }}"
-          - "Server: {{ server }}"
+    - name: import vhost config debugging task
+      include_tasks: tasks/debug-vhost-config.yml
+      when: debug_config is defined and debug_config
+    
+    - name: start primary tasks
+      block:
+        -
+          debug:
+            msg: nothing
+      when: not debug_config is defined or not debug_config
