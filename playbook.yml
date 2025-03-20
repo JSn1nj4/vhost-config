@@ -1,0 +1,30 @@
+- name: create new vhost
+  hosts: localhost
+  vars:
+    ansible_connection: local
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+  become: yes
+  become_user: root
+  vars_files:
+    - config/{{ vhost }}.yml
+  
+  tasks:
+
+    - name: print vars from provided config file
+      debug:
+        msg:
+          - "Hostname: {{ hostname }}"
+          - "Project directory: {{ project_dir }}"
+          - "PHP version: {{ php }}"
+          - "FPM settings:"
+          - "User: {{ fpm.user }}"
+          - "Group: {{ fpm.group }}"
+          - "Listening user: {{ fpm.listen.user }}"
+          - "Listening group: {{ fpm.listen.group }}"
+          - "Database:"
+          - "Type: {{ db.type }}"
+          - "Host: {{ db.host }}"
+          - "Name: {{ db.name }}"
+          - "User: {{ db.user }}"
+          - "Server: {{ server }}"
