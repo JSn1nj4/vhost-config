@@ -1,3 +1,5 @@
+---
+# vhost config template
 hostname: <hostname>
 project_dir: /path/to/project/root
 php: '8.4' # stick to minor versions for referencing php fpm directory
