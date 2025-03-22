@@ -22,27 +22,40 @@
         - debug:
             msg: nothing yet
 
+    - name: configure db
+      block:
+        - stat:
+            file: tasks/configure-{{ db.type }}-db.yml
+          register: db_task
+
+        - debug:
+            msg: config for db type {{ db.type }} not found
+          when: not db_task.stat.exists
+
+        - include_tasks: db_task.stat.path
+          when: db_task.stat.exists
+
+    - name: configure php runtime
+      block:
+        - include_tasks: tasks/configure-php-fpm.yml
+
     - name: configure vhost
       block:
         - include_tasks: tasks/link-project.yml
 
-    - name: configure db
-      block:
-        - set_fact:
-            db_conf_name: tasks/configure-{{ db.type }}-db.yml
-
         - stat:
-            file: "{{ db_conf_name }}"
-          register: db_conf
+            file: tasks/configure-{{ server }}-site.yml
+          register: srv_task
 
         - debug:
-            msg: config for db type {{ db.type }} not found
-          when: not db_conf.stat.exists
+            msg: task file not found for server type {{ server }}
+          when: not srv_task.stat.exists
 
-        - include_tasks: "{{ db_conf_name }}"
-          when: db_conf.stat.exists
+        - include_tasks: srv_task.stat.path
+          when: srv_task.stat.exists
 
     - name: restart services
       block:
         - debug:
             msg: nothing yet
+        # need: php fpm; nginx or apache
