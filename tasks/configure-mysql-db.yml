@@ -1,0 +1,16 @@
+---
+- block:
+    - name: create mysql database if it's missing
+      community.mysql.mysql_db:
+        name: "{{ db.name }}"
+        encoding: "{{ db.encoding }}"
+        collation: "{{ db.collation }}"
+        login_unix_socket: "{{ db.socket }}"
+        state: present
+    
+    - name: create the db user and grant privileges if it's missing
+      community.mysql.mysql_user:
+        name: "{{ db.user }}"
+        password: "{{ db.password }}"
+        priv: "{{ db.name }}.*:ALL"
+        state: present

@@ -1,0 +1,21 @@
+---
+- block:
+    - name: stat project directory
+      stat:
+        path: "{{ project_dir }}"
+      register: pj_dir
+
+    - name: stat www path
+      stat:
+        path: /var/www/{{ hostname }}
+      register: vh_lnk
+    
+    - name: create vhost/project link
+      file:
+        state: link
+        src: pj_dir.stat.path
+        dest: vh_lnk.stat.path
+      when:
+        - pj_dir.stat.isdir is defined
+        - pj_dir.stat.isdir
+        - not vh_lnk.stat.exists

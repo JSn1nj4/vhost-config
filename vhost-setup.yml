@@ -1,0 +1,48 @@
+- name: create new vhost
+  hosts: localhost
+  vars:
+    ansible_connection: local
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+  become: yes
+  become_user: root
+  vars_files:
+    - config/{{ vhost }}.yml
+  
+  tasks:
+    - name: import vhost config debugging task
+      block:
+        - include_tasks: tasks/dump-vhost-config.yml
+        - meta: end_play
+      when:
+        - dump_conf is defined and dump_conf
+
+    - name: check prerequisites
+      block:
+        - debug:
+            msg: nothing yet
+
+    - name: configure vhost
+      block:
+        - include_tasks: tasks/link-project.yml
+
+    - name: configure db
+      block:
+        - set_fact:
+            db_conf_name: tasks/configure-{{ db.type }}-db.yml
+
+        - stat:
+            file: "{{ db_conf_name }}"
+          register: db_conf
+        
+        - debug:
+            msg: config for db type {{ db.type }} not found
+          when: not db_conf.stat.exists
+
+        - include_tasks: "{{ db_conf_name }}"
+          when: db_conf.stat.exists
+          
+    - name: restart services
+      block:
+        - debug:
+            msg: nothing yet
