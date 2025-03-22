@@ -17,6 +17,18 @@
       when:
         - dump_conf is defined and dump_conf
 
+      # this should be for installing and configuring things like:
+      # - php, node, and other runtimes
+      # - web server
+      # - database engine
+      # - any ssl cert generator if necessary
+      # - supporting packages
+      #
+      # stuff that can be installed together like apt packages should be
+      # grouped (hopefully)
+      #
+      # asdf or others that need to be installed one-by-one can be grouped
+      # or handled one-by-one within task files (probably)
     - name: ensure prerequisites are set up
       block:
         - debug:
