@@ -66,6 +66,7 @@
         - include_tasks: srv_task.stat.path
           when: srv_task.stat.exists
 
+    # db services shouldn't need restarting
     - name: restart services
       block:
         - debug:
