@@ -1,5 +1,10 @@
 ---
 - block:
+    - name: ensure mysql is running
+      systemd_service:
+        name: mysqld
+        state: started
+
     - name: create mysql database if it's missing
       community.mysql.mysql_db:
         name: "{{ db.name }}"
@@ -7,7 +12,7 @@
         collation: "{{ db.collation }}"
         login_unix_socket: "{{ db.socket }}"
         state: present
-    
+
     - name: create the db user and grant privileges if it's missing
       community.mysql.mysql_user:
         name: "{{ db.user }}"
