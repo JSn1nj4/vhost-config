@@ -1,15 +1,19 @@
 ---
 # vhost config template
-hostname: <hostname>
-project_dir: /path/to/project/root
-php: '8.4' # stick to minor versions for referencing php fpm directory
+project:
+  hostname: <hostname>
+  dir: /path/to/project/root
+  type: <laravel|wordpress>
 
-fpm:
-  user: <user>
-  group: <group>
-  listen:
-    user: <listening-user>
-    group: <listening-group>
+php:
+    # stick to minor versions for referencing php fpm directory
+  version: '8.4'
+  fpm:
+    user: <user>
+    group: <group>
+    listen:
+      user: <listening-user>
+      group: <listening-group>
 
 db:
   type: <mysql|postgresql>
@@ -17,6 +21,13 @@ db:
   name: <dbname>
   user: <dbuser>
   password: <dbpassword>
-  public_schema: true # postgresql only; tell project whether to use the DB's public schema or set up a separate one
+  socket: /path/to/auth/unix/socket
+
+  # postgres stuff
+  public_schema: true # tell project whether to use the DB's public schema or set up a separate one
+
+  # mysql stuff
+  encoding: utf8mb4
+  collation: utf8mb4_unicode_ci
 
 server: <apache|nginx>
