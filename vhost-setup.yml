@@ -63,5 +63,13 @@
             msg: task file not found for server type {{ server }}
           when: not srv_task.stat.exists
 
+        - name: shove hostname into hosts file
+          lineinfile:
+            state: present
+            dest: etc_hosts
+            line: |
+              127.0.0.1 {{ project.hostname }} www.{{project.hostname }}
+          when: srv_task.stat.exists
+
         - include_tasks: srv_task.stat.path
           when: srv_task.stat.exists
