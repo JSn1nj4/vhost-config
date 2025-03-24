@@ -3,14 +3,14 @@
     - name: print vars from provided config file
       debug:
         msg:
-          - "Hostname: {{ hostname }}"
-          - "Project directory: {{ project_dir }}"
-          - "PHP version: {{ php }}"
+          - "Hostname: {{ project.hostname }}"
+          - "Project directory: {{ project.dir }}"
+          - "PHP version: {{ php.version }}"
           - "FPM settings:"
-          - "User: {{ fpm.user }}"
-          - "Group: {{ fpm.group }}"
-          - "Listening user: {{ fpm.listen.user }}"
-          - "Listening group: {{ fpm.listen.group }}"
+          - "User: {{ php.fpm.user }}"
+          - "Group: {{ php.fpm.group }}"
+          - "Listening user: {{ php.fpm.listen.user }}"
+          - "Listening group: {{ php.fpm.listen.group }}"
           - "Database:"
           - "Type: {{ db.type }}"
           - "Host: {{ db.host }}"

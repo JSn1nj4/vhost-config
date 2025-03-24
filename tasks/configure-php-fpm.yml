@@ -1,12 +1,12 @@
-- name: configure php {{ php }} fpm
+- name: configure php {{ php.version }} fpm
 - block:
     - name: check php fpm directory
       stat:
-        directory: /etc/php/{{ php }}/fpm
+        directory: /etc/php/{{ php.version }}/fpm
       register: fpm_dir
 
     - debug:
-        msg: php {{ php }} fpm directory not found
+        msg: php {{ php.version }} fpm directory not found
       when: not fpm_dir.stat.exists
 
     - stat:

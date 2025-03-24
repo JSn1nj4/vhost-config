@@ -2,14 +2,14 @@
 - block:
     - name: stat project directory
       stat:
-        path: "{{ project_dir }}"
+        path: "{{ project.dir }}"
       register: pj_dir
 
     - name: stat www path
       stat:
-        path: /var/www/{{ hostname }}
+        path: /var/www/{{ project.hostname }}
       register: vh_lnk
-    
+
     - name: create vhost/project link
       file:
         state: link
