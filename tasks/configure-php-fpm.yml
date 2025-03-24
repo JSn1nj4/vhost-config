@@ -1,0 +1,28 @@
+- name: configure php {{ php }} fpm
+- block:
+    - name: check php fpm directory
+      stat:
+        directory: /etc/php/{{ php }}/fpm
+      register: fpm_dir
+
+    - debug:
+        msg: php {{ php }} fpm directory not found
+      when: not fpm_dir.stat.exists
+
+    - stat:
+        file: "{{ fpm_dir.stat.path }}/pool.d/{{ vhost }}.conf"
+      register: vhost_fpm_conf
+
+    - name: create fpm config and reload php fpm
+      block:
+        - template:
+            src: templates/php-fpm-site.conf.j2
+            dest: vhost_fpm_conf.stat.path
+        - name: restart php fpm
+          systemd_service:
+            name: php8.4-fpm
+            state: reloaded
+      when:
+        - defined fpm_dir.stat.isdir
+        - fpm_dir.stat.isdir
+        - not vhost_fpm_conf.stat.exists
