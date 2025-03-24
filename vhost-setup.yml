@@ -4,7 +4,7 @@
     ansible_connection: local
     ansible_python_interpreter: "{{ ansible_playbook_python }}"
 
-  become: yes
+  become: true
   become_user: root
   vars_files:
     - config/{{ vhost }}.yml
@@ -37,14 +37,14 @@
     - name: configure db
       block:
         - stat:
-            file: tasks/configure-{{ db.type }}-db.yml
+            path: tasks/configure-{{ db.type }}-db.yml
           register: db_task
 
         - debug:
             msg: config for db type {{ db.type }} not found
           when: not db_task.stat.exists
 
-        - include_tasks: db_task.stat.path
+        - include_tasks: "{{ db_task.stat.path }}"
           when: db_task.stat.exists
 
     - name: configure php runtime
@@ -56,7 +56,7 @@
         - include_tasks: tasks/link-project.yml
 
         - stat:
-            file: tasks/configure-{{ server }}-site.yml
+            path: tasks/configure-{{ server }}-site.yml
           register: srv_task
 
         - debug:
@@ -66,10 +66,10 @@
         - name: shove hostname into hosts file
           lineinfile:
             state: present
-            dest: etc_hosts
+            dest: /etc/hosts
             line: |
-              127.0.0.1 {{ project.hostname }} www.{{project.hostname }}
+              127.0.0.1 {{ project.hostname }} www.{{ project.hostname }}
           when: srv_task.stat.exists
 
-        - include_tasks: srv_task.stat.path
+        - include_tasks: "{{ srv_task.stat.path }}"
           when: srv_task.stat.exists

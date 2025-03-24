@@ -1,8 +1,8 @@
 server {
 	server_name {{ project.hostname }} www.{{ project.hostname }};
-    {% if project.type is 'laravel' %}
+    {% if project.type == 'laravel' %}
 	root /var/www/{{ project.hostname }}/public;
-    {% elif project.type is 'wordpress' %}
+    {% elif project.type == 'wordpress' %}
     root /var/www/{{ project.hostname }};
     {% endif %}
 

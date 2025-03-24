@@ -1,34 +1,49 @@
 - name: configure nginx site
   block:
-    - stat:
-        file: /etc/nginx/sites-available/{{ project.hostname }}
+    - name: store nginx site conf path
+      set_fact:
+        site_conf_path: /etc/nginx/sites-available/{{ project.hostname }}
+
+    - name: register sites-available conf path
+      stat:
+        path: "{{ site_conf_path }}"
       register: site_conf
 
-    - debug:
+    - name: print message if site conf already exists
+      debug:
         msg: site conf for {{ project.hostname }} exists
       when: site_conf.stat.exists
 
     - name: create site conf
       template:
         src: templates/nginx-site.j2
-        dest: site_conf.stat.path
+        dest: "{{ site_conf_path }}"
+        mode: 0644
       when: not site_conf.stat.exists
 
-    - stat:
-        path: /etc/nginx/sites-enabled/{{ project.hostname }}
+    - name: store site conf link path
+      set_fact:
+        site_link_path: /etc/nginx/sites-enabled/{{ project.hostname }}
+
+    - name: register sites-enabled conf path
+      stat:
+        path: "{{ site_link_path }}"
       register: site_link
 
-    - debug:
+    - name: print message if site conf already linked
+      debug:
         msg: link for site conf {{ project.hostname }} exists
       when: site_link.stat.exists
 
-    - name: link site conf and restart nginx
+    - name: final nginx setup
       block:
-        - file:
+        - name: link site conf
+          file:
             state: link
-            src: site_conf.stat.path
-            dest: site_link.stat.path
-        - systemd_service:
+            src: "{{ site_conf.stat.path }}"
+            dest: "{{ site_link_path }}"
+        - name: restart nginx
+          ansible.builtin.systemd:
             name: nginx
             state: restarted
       when:

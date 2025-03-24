@@ -1,9 +1,9 @@
----
-- block:
+- name: configure project mysql db
+  block:
     - name: ensure mysql is running
-      systemd_service:
-        name: mysqld
+      ansible.builtin.systemd:
         state: started
+        name: mysqld
 
     - name: create mysql database if it's missing
       community.mysql.mysql_db:
@@ -11,6 +11,8 @@
         encoding: "{{ db.encoding }}"
         collation: "{{ db.collation }}"
         login_unix_socket: "{{ db.socket }}"
+        login_user: "{{ db.login_user }}"
+        login_password: "{{ db.login_pw }}"
         state: present
 
     - name: create the db user and grant privileges if it's missing
@@ -18,4 +20,7 @@
         name: "{{ db.user }}"
         password: "{{ db.password }}"
         priv: "{{ db.name }}.*:ALL"
+        login_unix_socket: "{{ db.socket }}"
+        login_user: "{{ db.login_user }}"
+        login_password: "{{ db.login_pw }}"
         state: present

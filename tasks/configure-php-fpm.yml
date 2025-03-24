@@ -1,28 +1,36 @@
 - name: configure php {{ php.version }} fpm
-- block:
+  block:
     - name: check php fpm directory
       stat:
-        directory: /etc/php/{{ php.version }}/fpm
+        path: /etc/php/{{ php.version }}/fpm
       register: fpm_dir
 
-    - debug:
+    - name: print when root fpm dir not found
+      debug:
         msg: php {{ php.version }} fpm directory not found
       when: not fpm_dir.stat.exists
 
-    - stat:
-        file: "{{ fpm_dir.stat.path }}/pool.d/{{ vhost }}.conf"
+    - name: store vhost fpm conf path
+      set_fact:
+        vhost_fpm_conf_path: "{{ fpm_dir.stat.path }}/pool.d/{{ vhost }}.conf"
+
+    - name: check php fpm vhost conf
+      stat:
+        path: "{{ vhost_fpm_conf_path }}"
       register: vhost_fpm_conf
 
-    - name: create fpm config and reload php fpm
+    - name: final php fpm setup
       block:
-        - template:
+        - name: write php fpm vhost conf
+          template:
             src: templates/php-fpm-site.conf.j2
-            dest: vhost_fpm_conf.stat.path
+            dest: "{{ vhost_fpm_conf_path }}"
+            mode: 0644
         - name: restart php fpm
-          systemd_service:
+          ansible.builtin.systemd:
             name: php8.4-fpm
             state: reloaded
       when:
-        - defined fpm_dir.stat.isdir
+        - fpm_dir.stat.isdir is defined
         - fpm_dir.stat.isdir
         - not vhost_fpm_conf.stat.exists
