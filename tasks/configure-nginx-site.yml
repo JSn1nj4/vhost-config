@@ -1,0 +1,36 @@
+- name: configure nginx site
+  block:
+    - stat:
+        file: /etc/nginx/sites-available/{{ project.hostname }}
+      register: site_conf
+
+    - debug:
+        msg: site conf for {{ project.hostname }} exists
+      when: site_conf.stat.exists
+
+    - name: create site conf
+      template:
+        src: templates/nginx-site.j2
+        dest: site_conf.stat.path
+      when: not site_conf.stat.exists
+
+    - stat:
+        path: /etc/nginx/sites-enabled/{{ project.hostname }}
+      register: site_link
+
+    - debug:
+        msg: link for site conf {{ project.hostname }} exists
+      when: site_link.stat.exists
+
+    - name: link site conf and restart nginx
+      block:
+        - file:
+            state: link
+            src: site_conf.stat.path
+            dest: site_link.stat.path
+        - systemd_service:
+            name: nginx
+            state: restarted
+      when:
+        - site_conf.stat.exists
+        - not site_link.stat.exists
