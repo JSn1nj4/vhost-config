@@ -22,6 +22,8 @@ db:
   user: <dbuser>
   password: <dbpassword>
   socket: /path/to/auth/unix/socket
+  login_user: <username>
+  login_pw: <password>
 
   # postgres stuff
   public_schema: true # tell project whether to use the DB's public schema or set up a separate one
