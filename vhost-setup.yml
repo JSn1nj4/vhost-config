@@ -65,10 +65,3 @@
 
         - include_tasks: srv_task.stat.path
           when: srv_task.stat.exists
-
-    # db services shouldn't need restarting
-    - name: restart services
-      block:
-        - debug:
-            msg: nothing yet
-        # need: php fpm; nginx or apache
