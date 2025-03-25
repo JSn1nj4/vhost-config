@@ -1,0 +1,51 @@
+- name: configure apache site
+  block:
+    - name: store conf path
+      set_fact:
+        site_conf_path: /etc/apache2/sites-available/{{ project.hostname }}
+
+    - name: stat sites-available conf
+      stat:
+        path: "{{ site_conf_path }}"
+      register: site_conf
+
+    - name: print message if site conf already exists
+      debug:
+        msg: site conf for {{ project.hostname }} exists
+      when: site_conf.stat.exists
+
+    - name: create site conf if missing
+      template:
+        src: templates/apache-site.j2
+        dest: "{{ site_conf_path }}"
+        mode: 0644
+      when: not site_conf.stat.exists
+
+    - name: store site conf link path
+      set_fact:
+        site_link_path: /etc/apache2/sites-enabled/{{ project.hostname }}
+
+    - name: stat sites-enabled conf link
+      stat:
+        path: "{{ site_link_path }}"
+      register: site_link
+
+    - name: print message if site conf missing
+      debug:
+        msg: link for site conf {{ project.hostname }} exists
+      when: site_link.stat.exists
+
+    - name: final apache site setup
+      block:
+        - name: enable apache site
+          file:
+            state: link
+            src: "{{ site_conf.stat.path }}"
+            dest: "{{ site_link_path }}"
+        - name: restart apache
+          ansible.builtin.systemd:
+            name: apache2
+            state: restarted
+      when:
+        - site_conf.stat.exists
+        - not site_link.stat.exists

@@ -1,0 +1,39 @@
+<VirtualHost 127.0.0.1:443>
+	ServerName {{ project.hostname }}
+	ServerAlias www.{{ project.hostname }}
+
+	{% if project.type == 'laravel' %}
+	DocumentRoot /var/www/{{ project.hostname }}/public
+	{% elif project.type == 'wordpress' %}
+	DocumentRoot /var/www/{{ project.hostname }}
+    {% endif %}
+
+    LogLevel debug
+	ErrorLog /var/www/{{ project.hostname }}/error.log
+	CustomLog /var/www/{{ project.hostname }}/access.log combined
+
+	SSLEngine on
+	SSLCertificateFile /var/www/{{ project.hostname }}/config/local/{{ project.hostname }}.pem
+	SSLCertificateKeyFile /var/www/{{ project.hostname }}/config/local/{{ project.hostname }}-key.pem
+
+	<Directory /var/www/{{ project.hostname }}>
+	    {% if project.type == 'wordpress' %}
+		Options -Indexes +FollowSymLinks
+		AllowOverride All
+		{% elif project.type == 'laravel' %}
+		Options Indexes FollowSymlinks MultiViews %}
+		AllowOverride All
+		Order allow,deny
+		allow from all
+		{% endif %}
+
+		Require all granted
+	</Directory>
+
+</VirtualHost>
+<VirtualHost 127.0.0.1:80>
+	ServerName {{ project.hostname }}
+	ServerAlias www.{{ project.hostname }}
+
+	Redirect permanent / https://{{ project.hostname }}/
+</VirtualHost>
