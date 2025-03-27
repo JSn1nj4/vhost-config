@@ -1,39 +1,85 @@
-<VirtualHost 127.0.0.1:443>
-	ServerName {{ project.hostname }}
-	ServerAlias www.{{ project.hostname }}
+<VirtualHost *:443>
+  ServerName {{ project.vhost }}
+	ServerAlias www.{{ project.vhost }}
 
-	{% if project.type == 'laravel' %}
-	DocumentRoot /var/www/{{ project.hostname }}/public
-	{% elif project.type == 'wordpress' %}
-	DocumentRoot /var/www/{{ project.hostname }}
-    {% endif %}
+  {% if project.type == 'laravel' %}
+  DocumentRoot /var/www/{{ project.vhost }}/public
+  {% elif project.type == 'wordpress' %}
+	DocumentRoot /var/www/{{ project.vhost }}
+  {% endif %}
 
-    LogLevel debug
-	ErrorLog /var/www/{{ project.hostname }}/error.log
-	CustomLog /var/www/{{ project.hostname }}/access.log combined
+	SSLEngine On
+	SSLCertificateFile /var/www/{{ project.vhost }}/config/local/{{ project.vhost }}.pem
+	SSLCertificateKeyFile /var/www/{{ project.vhost }}/config/local/{{ project.vhost }}-key.pem
 
-	SSLEngine on
-	SSLCertificateFile /var/www/{{ project.hostname }}/config/local/{{ project.hostname }}.pem
-	SSLCertificateKeyFile /var/www/{{ project.hostname }}/config/local/{{ project.hostname }}-key.pem
+	ErrorLog /var/www/{{ project.vhost }}/error.log
+	CustomLog /var/www/{{ project.vhost }}/access.log combined
 
-	<Directory /var/www/{{ project.hostname }}>
-	    {% if project.type == 'wordpress' %}
-		Options -Indexes +FollowSymLinks
-		AllowOverride All
-		{% elif project.type == 'laravel' %}
-		Options Indexes FollowSymlinks MultiViews %}
-		AllowOverride All
-		Order allow,deny
-		allow from all
-		{% endif %}
+  {% if project.type == 'laravel' %}
+  <Directory /var/www/{{ project.hostname }}/public>
+		Options +FollowSymLinks
 
+		AllowOverride None
 		Require all granted
+
+		<FilesMatch "\.php$">
+			SetHandler "proxy:unix:/run/php/{{ project.hostname }}.sock|fcgi://{{ project.hostname }}"
+		</FilesMatch>
+
+		<IfModule mod_rewrite.c>
+			<IfModule mod_negotiation.c>
+				Options -MultiViews -Indexes
+			</IfModule>
+
+			RewriteEngine On
+
+			# handle authorization header
+			RewriteCond %{HTTP:Authorization} ^(.+)$
+			RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+			# Redirect Trailing Slashes If Not A Folder...
+			RewriteCond %{REQUEST_FILENAME} !-d
+			RewriteCond %{REQUEST_URI} (.+)/$
+			RewriteRule ^ %1 [L,R=301]
+
+			# Send Requests To Front Controller...
+			RewriteCond %{REQUEST_FILENAME} !-d
+			RewriteCond %{REQUEST_FILENAME} !-f
+			RewriteRule ^ index.php [L]
+		</IfModule>
 	</Directory>
+  {% elif project.type == 'wordpress' %}
+	<Directory /var/www/{{ project.vhost }}>
+		Options -Indexes +FollowSymLinks
+		AllowOverride None
+		Require all granted
 
+		# BEGIN WordPress
+		# The directives (lines) between "BEGIN WordPress" and "END WordPress" are
+		# dynamically generated, and should only be modified via WordPress filters.
+		# Any changes to the directives between these markers will be overwritten.
+		<IfModule mod_rewrite.c>
+			RewriteEngine On
+			RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+			RewriteBase /
+			RewriteRule ^index\.php$ - [L]
+			RewriteCond %{REQUEST_FILENAME} !-f
+			RewriteCond %{REQUEST_FILENAME} !-d
+			RewriteRule . /index.php [L]
+		</IfModule>
+
+		# END WordPress
+
+		# File restrictions
+		<FilesMatch "((\.config|\.idea|\.scripts|\.vscode|vendor)(/.*)?|.*\.(yml|conf|j2|md)|composer\.*|Vagrantfile|license.txt|readme(.*)?.html)$">
+			Require all denied
+		</FilesMatch>
+	</Directory>
+  {% endif %}
 </VirtualHost>
-<VirtualHost 127.0.0.1:80>
-	ServerName {{ project.hostname }}
-	ServerAlias www.{{ project.hostname }}
+<VirtualHost *:80>
+	ServerName {{ project.vhost }}
+	ServerAlias www.{{ project.vhost }}
 
-	Redirect permanent / https://{{ project.hostname }}/
+	Redirect permanent / https://{{ project.vhost }}/
 </VirtualHost>
