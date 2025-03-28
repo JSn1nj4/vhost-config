@@ -46,6 +46,6 @@
           ansible.builtin.systemd:
             name: nginx
             state: restarted
-      when:
+      when: # why was this skipped when it didn't even exist yet
         - site_conf.stat.exists
         - not site_link.stat.exists
