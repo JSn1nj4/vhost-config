@@ -2,7 +2,7 @@
   block:
     - name: store conf path
       set_fact:
-        site_conf_path: /etc/apache2/sites-available/{{ project.hostname }}
+        site_conf_path: /etc/apache2/sites-available/{{ project.hostname }}.conf
 
     - name: stat sites-available conf
       stat:
@@ -16,14 +16,14 @@
 
     - name: create site conf if missing
       template:
-        src: templates/apache-site.j2
+        src: templates/apache-site.conf.j2
         dest: "{{ site_conf_path }}"
         mode: 0644
       when: not site_conf.stat.exists
 
     - name: store site conf link path
       set_fact:
-        site_link_path: /etc/apache2/sites-enabled/{{ project.hostname }}
+        site_link_path: /etc/apache2/sites-enabled/{{ project.hostname }}.conf
 
     - name: stat sites-enabled conf link
       stat:
