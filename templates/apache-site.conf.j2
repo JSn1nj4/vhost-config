@@ -1,19 +1,19 @@
 <VirtualHost *:443>
-    ServerName {{ project.vhost }}
-    ServerAlias www.{{ project.vhost }}
+    ServerName {{ project.hostname }}
+    ServerAlias www.{{ project.hostname }}
 
     {% if project.type == 'laravel' %}
-    DocumentRoot /var/www/{{ project.vhost }}/public
+    DocumentRoot /var/www/{{ project.hostname }}/public
     {% elif project.type == 'wordpress' %}
-    DocumentRoot /var/www/{{ project.vhost }}
+    DocumentRoot /var/www/{{ project.hostname }}
     {% endif %}
 
     SSLEngine On
-    SSLCertificateFile /var/www/{{ project.vhost }}/config/local/{{ project.vhost }}.pem
-    SSLCertificateKeyFile /var/www/{{ project.vhost }}/config/local/{{ project.vhost }}-key.pem
+    SSLCertificateFile /var/www/{{ project.hostname }}/config/local/{{ project.hostname }}.pem
+    SSLCertificateKeyFile /var/www/{{ project.hostname }}/config/local/{{ project.hostname }}-key.pem
 
-    ErrorLog /var/www/{{ project.vhost }}/error.log
-    CustomLog /var/www/{{ project.vhost }}/access.log combined
+    ErrorLog /var/www/{{ project.hostname }}/error.log
+    CustomLog /var/www/{{ project.hostname }}/access.log combined
 
     {% if project.type == 'laravel' %}
     <Directory /var/www/{{ project.hostname }}/public>
@@ -49,7 +49,7 @@
         </IfModule>
     </Directory>
     {% elif project.type == 'wordpress' %}
-    <Directory /var/www/{{ project.vhost }}>
+    <Directory /var/www/{{ project.hostname }}>
         Options -Indexes +FollowSymLinks
         AllowOverride None
         Require all granted
@@ -78,8 +78,8 @@
     {% endif %}
 </VirtualHost>
 <VirtualHost *:80>
-    ServerName {{ project.vhost }}
-    ServerAlias www.{{ project.vhost }}
+    ServerName {{ project.hostname }}
+    ServerAlias www.{{ project.hostname }}
 
-    Redirect permanent / https://{{ project.vhost }}/
+    Redirect permanent / https://{{ project.hostname }}/
 </VirtualHost>
