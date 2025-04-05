@@ -46,6 +46,7 @@
 
         - include_tasks: "{{ db_task.stat.path }}"
           when: db_task.stat.exists
+      when: db.type != 'none'
 
     - name: configure php runtime
       block:

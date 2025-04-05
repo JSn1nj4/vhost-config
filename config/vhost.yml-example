@@ -16,7 +16,8 @@ php:
       group: <listening-group>
 
 db:
-  type: <mysql|postgresql>
+  # 'none' will skip DB setup
+  type: <mysql|postgresql|none>
   host: <db_host>
   name: <dbname>
   user: <dbuser>
